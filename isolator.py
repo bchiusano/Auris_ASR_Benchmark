@@ -6,6 +6,239 @@ import xlsxwriter
 from collections import defaultdict
 from sastadev.lexicon import known_word
 
+# stamper (grammatical analysis)
+# regular expressions used to obtain the wrong words and their corrections
+noncompletionpattern = r'(.*)\((\w*)\)(.*)'
+noncompletionre = re.compile(noncompletionpattern)
+
+replacementpattern = r'(\w+(?:\(\w\))?)\s*\[:\s*(\w+(?:\’\w+)?)\s*\]'
+replacementre = re.compile(replacementpattern)
+
+explanationpattern = r'(\w+)\s*\[=\s+([ \w]+)\s*\]'
+explanationre = re.compile(explanationpattern)
+
+# officially [= must be followed by a space. But this is often not done, and does not lead to ambiguity in some cases
+# for these we are robust and allow the absence of space
+robustexplanationpattern = r'(\[=)([^!? ])'
+robustexplanationre = re.compile(robustexplanationpattern)
+
+# these words are not considered valid words by the function *known_word* but we count them as correct
+validwords = {"z'n", 'dees', 'cool'}
+punctuationsymbols = """.,?!:;"'"""
+
+
+def isvalidword(w: str) -> bool:
+    '''
+    function to determine whether a word is a valid Dutch word
+    :param w:
+    :return: bool
+    '''
+    if known_word(w):
+        return True
+    elif w in punctuationsymbols:
+        return True
+    elif w in validwords:
+        return True
+    else:
+        return False
+
+
+def getexplanations(rawutt):
+    '''
+    function to obtain the explanations from an utterance
+    :param rawutt: str
+    :return: List of (wrongword, correction) pairs
+    '''
+    geluid = "brbr"
+    geluid2 = "brbrbrbr"
+    geluid3 = "brbrbr"
+    results = []
+    utt = robustexplanationre.sub(r'\1 \2', rawutt)
+    matches = explanationre.finditer(utt)
+    for match in matches:
+        wrong = match.group(1)
+        wrong = wrong.replace(".", "").replace("?", "").replace("‹", "").replace("@c", "").replace(">", "").replace("<",
+                                                                                                                    "")
+        correct = match.group(2)
+        correct = correct.replace(".", "").replace("?", "").replace("‹", "").replace("@c", "").replace(">", "").replace(
+            "<", "")
+        full_match = match.group(0)
+        full_match = full_match.replace(".", "").replace("?", "").replace("‹", "").replace("@c", "").replace(">",
+                                                                                                             "").replace(
+            "<", "")
+
+        if len(correct) > 4 \
+                and len(wrong) > 4 \
+                and len(correct.split()) == 1 \
+                and wrong.isalpha() \
+                and not correct[0].isupper() \
+                and wrong != geluid \
+                and wrong != geluid2 \
+                and wrong != geluid3 \
+                and isvalidword(wrong) is False:
+            results.append((full_match, wrong, correct))
+
+    return results
+
+
+def getreplacements(utt):
+    '''
+    function to obtain the replacements from an utterance
+    :param utt: str
+    :return: List of (wrongword, correction) pairs
+    '''
+    results = []
+    matches = replacementre.finditer(utt)
+    for match in matches:
+        wrong = match.group(1)
+        wrong = wrong.replace(".", "").replace("?", "").replace("‹", "").replace("@c", "").replace(">", "").replace("<",
+                                                                                                                    "")
+        correct = match.group(2)
+        correct = correct.replace(".", "").replace("?", "").replace("‹", "").replace("@c", "").replace(">", "").replace(
+            "<", "")
+        full_match = match.group(0)
+        full_match = full_match.replace(".", "").replace("?", "").replace("‹", "").replace("@c", "").replace(">",
+                                                                                                             "").replace(
+            "<", "")
+
+        if len(correct) > 4 \
+                and len(wrong) > 4 \
+                and len(correct.split()) == 1 \
+                and wrong.isalpha() \
+                and not correct[0].isupper() \
+                and isvalidword(wrong) is False:
+            results.append((full_match, wrong, correct))
+
+    return results
+
+
+def getnoncompletions(line):
+    '''
+    Function to obtain two lists from noncompletions in a line.
+    - Store only the noncompletions where the correct word is more than 4 characters long.
+    - The first list contains tuples of (cleaned_word, corrected_word).
+    - The second list contains tuples of (original_word, cleaned_word).
+
+    :param line: str
+    :return: Tuple[List[Tuple[cleaned_word:str, corrected_word:str]], List[Tuple[original_word:str, cleaned_word:str]]]
+    '''
+    words = line.split()
+    results = []
+
+    for w in words:
+        match = noncompletionre.search(w)
+        if match:
+            w = w.replace(".", "").replace("?", "").replace("‹", "").replace("@c", "").replace(">", "").replace("<", "")
+            wrong = undononcompletion(w)
+            wrong = wrong.replace(".", "").replace("?", "").replace("‹", "").replace("@c", "").replace(">", "").replace(
+                "<", "")
+            correct = applynoncompletion(w)
+            correct = correct.replace(".", "").replace("?", "").replace("‹", "").replace("@c", "").replace(">",
+                                                                                                           "").replace(
+                "<", "")
+
+            if len(correct) > 4 \
+                    and len(wrong) > 4 \
+                    and len(correct.split()) == 1 \
+                    and wrong.isalpha() \
+                    and not correct[0].isupper() \
+                    and isvalidword(wrong) is False:
+                results.append((w, wrong, correct))
+
+    return results
+
+
+def undononcompletion(word):
+    '''
+    function to undo a noncompletion, e.g. *(s)laap* is turned into *laap*.
+
+    :param word: str
+    :return: str
+    '''
+    inword = word
+    outword = ''
+    while True:
+        outword = noncompletionre.sub(r'\1\3', inword)  # iterate for there may be # multiple occurrences
+        if outword == inword:
+            return outword
+        else:
+            inword = outword
+
+
+def applynoncompletion(word):
+    '''
+    function to apply a noncompletion, e.g. *(s)laap* is turned into *slaap*.
+
+    :param word:
+    :return:
+    '''
+    inword = word
+    outword = ''
+    while True:
+        outword = noncompletionre.sub(r'\1\2\3', inword)  # iterate for there may be # multiple occurrences
+        if outword == inword:
+            return outword
+        else:
+            inword = outword
+
+
+def replace_match_wrong(line, to_correct):
+    for match, wrong, correct in to_correct:
+        wrong_replace = line.replace(match, wrong)
+
+    return wrong_replace
+
+
+def replace_match_correct(line, to_correct):
+    for match, wrong, correct in to_correct:
+        correct_replace = line.replace(match, correct)
+
+    return correct_replace
+
+
+def clean_chat_patterns_only(utterances, targetspeaker):
+    wrong_utterances = []
+    correct_utterances = []
+
+    # Step 2: Process each utterance
+    for utterance in utterances:
+        utterancespeaker = get_speaker(utterance)  # Get the speaker code of the utterance
+
+        # Only process utterances from the target speaker
+        if utterancespeaker == targetspeaker:
+            explanations_results = getexplanations(utterance)
+            replacements_results = getreplacements(utterance)
+            noncompletions_results = getnoncompletions(utterance)
+
+            if DEBUG:
+                print("explanations ", explanations_results)
+                print("replacements ", replacements_results)
+                print("non completions ", noncompletions_results)
+                print("Utterance Before: ", utterance)
+
+            wrong = utterance
+
+            if explanations_results or replacements_results or noncompletions_results:
+
+                temp_collector = [explanations_results, replacements_results, noncompletions_results]
+
+                for result in temp_collector:
+                    if result:
+                        wrong = replace_match_wrong(utterance, result)
+                        correct = replace_match_correct(utterance, result)
+                        if DEBUG:
+                            print("Utterance Explanation wrong: ", wrong)
+                            print("Utterance Explanation correct: ", correct)
+
+            if wrong != utterance:
+                wrong_utterances.append(wrong)
+                correct_utterances.append(correct)
+            else:
+                wrong_utterances.append(utterance)
+                correct_utterances.append(utterance)
+
+    return wrong_utterances, correct_utterances  # List of tuples (pattern, wrong, correct)
+
 
 def is_metadata(line):
     result = line != "" and line[0] == '@'
@@ -112,13 +345,15 @@ def get_timestamps(utterances, target_speaker):
     return cleaned_utterances, cleaned_timestamps
 
 
-def process_all_cha_files(default_childes_path, output_csv_path):
+def process_all_cha_files(default_childes_path):
     """
     Process all .cha files in the directory, isolating the child speech part of the transcript and the related timestamp
     :param default_childes_path: str, root directory containing .cha files
     :param output_csv_path: str, path for the output csv file
     """
-    final_dataframe = pd.DataFrame(columns=["filename", "utterances", "timestamps"])
+    original_dataframe = pd.DataFrame(columns=["filename", "utterances", "timestamps"])
+    wrong_dataframe = pd.DataFrame(columns=["filename", "utterances", "timestamps"])
+    correct_dataframe = pd.DataFrame(columns=["filename", "utterances", "timestamps"])
 
     # Step 1: Walk through the directory to process .cha files
     for root, dirs, thefiles in os.walk(default_childes_path):
@@ -135,7 +370,8 @@ def process_all_cha_files(default_childes_path, output_csv_path):
             header_data, utterances = get_chat_data(in_full_name)
             target_speaker = get_target_speaker(header_data)
 
-            # extract info: child utterance and timestamp
+            wrong_cleaned, correct_cleaned = clean_chat_patterns_only(utterances, target_speaker)
+
             processed_u, processed_t = get_timestamps(utterances, target_speaker)
 
             if DEBUG:
@@ -144,14 +380,27 @@ def process_all_cha_files(default_childes_path, output_csv_path):
                 print(len(processed_u))
                 print(len(processed_t))
 
+            new_row = pd.DataFrame({"filename": [in_file_name], "utterances": [processed_u], "timestamps": [processed_t]})
+            original_dataframe = pd.concat([original_dataframe, new_row], ignore_index=True)
+
+            processed_u, processed_t = get_timestamps(wrong_cleaned, target_speaker)
+            new_row = pd.DataFrame({"filename": [in_file_name], "utterances": [processed_u], "timestamps": [processed_t]})
+            wrong_dataframe = pd.concat([wrong_dataframe, new_row], ignore_index=True)
+
+            processed_u, processed_t = get_timestamps(correct_cleaned, target_speaker)
             new_row = pd.DataFrame(
                 {"filename": [in_file_name], "utterances": [processed_u], "timestamps": [processed_t]})
-            final_dataframe = pd.concat([final_dataframe, new_row], ignore_index=True)
+            correct_dataframe = pd.concat([correct_dataframe, new_row], ignore_index=True)
 
-    final_dataframe.to_csv(output_csv_path)
+    print(len(original_dataframe))
+    print(len(wrong_dataframe))
+    print(len(correct_dataframe))
+
+    original_dataframe.to_csv("datasets/cha_data.csv")
+    wrong_dataframe.to_csv("datasets/wrong_data.csv")
+    correct_dataframe.to_csv("datasets/correct_data.csv")
 
 
 DEBUG = False
 default_childes_path = 'Asymmetries/CK-TD'
-output_csv_path = "cha_data.csv"
-process_all_cha_files(default_childes_path, output_csv_path)
+process_all_cha_files(default_childes_path)
