@@ -9,7 +9,7 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
-import secrets
+import secrets_info
 
 
 class SeleniumBrowser:
@@ -61,7 +61,7 @@ seleniumBrowser.open_url(url=url, cookie_value=value)
 
 time.sleep(5)
 
-seleniumBrowser.login_talkbank(secrets.email, secrets.password)
+seleniumBrowser.login_talkbank(secrets_info.email, secrets_info.password)
 
 time.sleep(10)
 
