@@ -5,6 +5,7 @@ import re
 import xlsxwriter
 from collections import defaultdict
 from sastadev.lexicon import known_word
+from chamd.cleanCHILDESMD import cleantext
 
 # stamper (grammatical analysis)
 # regular expressions used to obtain the wrong words and their corrections
@@ -66,7 +67,7 @@ def getexplanations(rawutt):
         full_match = full_match.replace(".", "").replace("?", "").replace("‹", "").replace("@c", "").replace(">",
                                                                                                              "").replace(
             "<", "")
-
+        '''
         if len(correct) > 4 \
                 and len(wrong) > 4 \
                 and len(correct.split()) == 1 \
@@ -76,7 +77,8 @@ def getexplanations(rawutt):
                 and wrong != geluid2 \
                 and wrong != geluid3 \
                 and isvalidword(wrong) is False:
-            results.append((full_match, wrong, correct))
+        '''
+        results.append((full_match, wrong, correct))
 
     return results
 
@@ -100,14 +102,15 @@ def getreplacements(utt):
         full_match = full_match.replace(".", "").replace("?", "").replace("‹", "").replace("@c", "").replace(">",
                                                                                                              "").replace(
             "<", "")
-
+        '''
         if len(correct) > 4 \
                 and len(wrong) > 4 \
                 and len(correct.split()) == 1 \
                 and wrong.isalpha() \
                 and not correct[0].isupper() \
                 and isvalidword(wrong) is False:
-            results.append((full_match, wrong, correct))
+        '''
+        results.append((full_match, wrong, correct))
 
     return results
 
@@ -137,13 +140,15 @@ def getnoncompletions(line):
                                                                                                            "").replace(
                 "<", "")
 
+            '''
             if len(correct) > 4 \
                     and len(wrong) > 4 \
                     and len(correct.split()) == 1 \
                     and wrong.isalpha() \
                     and not correct[0].isupper() \
                     and isvalidword(wrong) is False:
-                results.append((w, wrong, correct))
+            '''
+            results.append((w, wrong, correct))
 
     return results
 
@@ -324,7 +329,7 @@ def get_speaker(utt):
     return result
 
 
-def get_timestamps(utterances, target_speaker):
+def get_timestamps(utterances, target_speaker, s):
     cleaned_utterances = []
     cleaned_timestamps = []
 
@@ -338,8 +343,14 @@ def get_timestamps(utterances, target_speaker):
                 timestamp_ = re.sub(r'\x15', '', isolate_stamp[0])
                 timestamp = re.sub(r'_', " ", timestamp_).split()
                 cleaned_text = re.sub(r'\*CHI:\t|\x15\d+_\d+\x15|\[//\]|\n|[<>()]', '', utterance)
+                sasta_clean = cleantext(cleaned_text, False)
 
-                cleaned_utterances.append(cleaned_text)
+                if DEBUG:
+                    print(s)
+                    print("cleaned text before sasta:" , cleaned_text)
+                    print("cleaned text after sasta:" , sasta_clean)
+
+                cleaned_utterances.append(sasta_clean)
                 cleaned_timestamps.append(timestamp)
 
     return cleaned_utterances, cleaned_timestamps
@@ -372,7 +383,7 @@ def process_all_cha_files(default_childes_path):
 
             wrong_cleaned, correct_cleaned = clean_chat_patterns_only(utterances, target_speaker)
 
-            processed_u, processed_t = get_timestamps(utterances, target_speaker)
+            processed_u, processed_t = get_timestamps(utterances, target_speaker, "ORIGINAL")
 
             if DEBUG:
                 print(processed_u)
@@ -383,11 +394,11 @@ def process_all_cha_files(default_childes_path):
             new_row = pd.DataFrame({"filename": [in_file_name], "utterances": [processed_u], "timestamps": [processed_t]})
             original_dataframe = pd.concat([original_dataframe, new_row], ignore_index=True)
 
-            processed_u, processed_t = get_timestamps(wrong_cleaned, target_speaker)
+            processed_u, processed_t = get_timestamps(wrong_cleaned, target_speaker, "WRONG")
             new_row = pd.DataFrame({"filename": [in_file_name], "utterances": [processed_u], "timestamps": [processed_t]})
             wrong_dataframe = pd.concat([wrong_dataframe, new_row], ignore_index=True)
 
-            processed_u, processed_t = get_timestamps(correct_cleaned, target_speaker)
+            processed_u, processed_t = get_timestamps(correct_cleaned, target_speaker, "CORRECT")
             new_row = pd.DataFrame(
                 {"filename": [in_file_name], "utterances": [processed_u], "timestamps": [processed_t]})
             correct_dataframe = pd.concat([correct_dataframe, new_row], ignore_index=True)
