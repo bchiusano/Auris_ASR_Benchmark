@@ -342,15 +342,17 @@ def get_timestamps(utterances, target_speaker, s):
             if len(isolate_stamp) != 0:
                 timestamp_ = re.sub(r'\x15', '', isolate_stamp[0])
                 timestamp = re.sub(r'_', " ", timestamp_).split()
-                cleaned_text = re.sub(r'\*CHI:\t|\x15\d+_\d+\x15|\[//\]|\n|[<>()]', '', utterance)
-                sasta_clean = cleantext(cleaned_text, False)
+                clean_ts = re.sub(r'\*CHI:\t|\x15\d+_\d+\x15|\[//\]|\n|[<>()]', '', utterance)
+                sasta_clean = cleantext(clean_ts, False)
+                cleaned_text = re.sub(' +', ' ', sasta_clean.replace(".", ""))
 
                 if DEBUG:
                     print(s)
-                    print("cleaned text before sasta:" , cleaned_text)
-                    print("cleaned text after sasta:" , sasta_clean)
+                    print("cleaned text before sasta:", clean_ts)
+                    print("cleaned text after sasta:", sasta_clean)
+                    print("FINAL: ", cleaned_text)
 
-                cleaned_utterances.append(sasta_clean)
+                cleaned_utterances.append(cleaned_text)
                 cleaned_timestamps.append(timestamp)
 
     return cleaned_utterances, cleaned_timestamps
