@@ -362,7 +362,6 @@ def process_all_cha_files(default_childes_path):
     """
     Process all .cha files in the directory, isolating the child speech part of the transcript and the related timestamp
     :param default_childes_path: str, root directory containing .cha files
-    :param output_csv_path: str, path for the output csv file
     """
     original_dataframe = pd.DataFrame(columns=["filename", "utterances", "timestamps"])
     wrong_dataframe = pd.DataFrame(columns=["filename", "utterances", "timestamps"])
@@ -409,9 +408,9 @@ def process_all_cha_files(default_childes_path):
     print(len(wrong_dataframe))
     print(len(correct_dataframe))
 
-    original_dataframe.to_csv("datasets/cha_data.csv", index=False)
-    wrong_dataframe.to_csv("datasets/wrong_data.csv", index= False)
-    correct_dataframe.to_csv("datasets/correct_data.csv", index= False)
+    original_dataframe.to_csv("csvs/cha_data.csv", index=False)
+    wrong_dataframe.to_csv("csvs/wrong_data.csv", index=False)
+    correct_dataframe.to_csv("csvs/correct_data.csv", index=False)
 
 
 DEBUG = False

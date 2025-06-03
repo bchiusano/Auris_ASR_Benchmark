@@ -7,15 +7,18 @@ AT_LEAST_SIX = True
 
 path_to_audio_files = "CHILDES Downloads/DutchAfrikaans/Asymmetries/CK-TD/"
 
-data = pd.read_csv("datasets/wrong_data.csv")
+data = pd.read_csv("csvs/correct_data.csv")
 
 filenames = data['filename'].to_list()
+
+all_metadata = pd.DataFrame(columns=["filename", "transcript"])
+six_metadata = pd.DataFrame(columns=["filename", "transcript"])
 
 for i in range(len(filenames)):
 
     # FILES
     file_name = filenames[i]
-    if DEBUG: print(file_name)
+    print(file_name)
 
     # TRANSCRIPTS
     transcript = data['utterances'].iloc[i]
@@ -47,11 +50,20 @@ for i in range(len(filenames)):
             print(utterance)
             print(len(utterance.split()))
 
-        if AT_LEAST_SIX and len(utterance.split()) > 6:
-            if DEBUG: print("SIX")
+        new_row = pd.DataFrame(
+            {"filename": ["audio_{name}_{s}_{e}.mp3".format(name=title_name, s=start, e=end)], "transcript": [utterance]})
+
+        if AT_LEAST_SIX and len(utterance.split()) > 5:
+            if DEBUG: print("at least SIX")
             audio_chunk.export(
-                "wrongDatasetSix/Asymmetries/audio_{name}_{s}_{e}.mp3".format(name=title_name, s=start, e=end),
+                "datasets/correctDatasetSix/Asymmetries/audio_{name}_{s}_{e}.mp3".format(name=title_name, s=start, e=end),
                 format="mp3")
 
-        audio_chunk.export("wrongDataset/Asymmetries/audio_{name}_{s}_{e}.mp3".format(name=title_name, s=start, e=end),
+            six_metadata = pd.concat([six_metadata, new_row], ignore_index=True)
+
+        audio_chunk.export("datasets/correctDataset/Asymmetries/audio_{name}_{s}_{e}.mp3".format(name=title_name, s=start, e=end),
                            format="mp3")
+        all_metadata = pd.concat([all_metadata, new_row], ignore_index=True)
+
+all_metadata.to_csv("datasets/correctDataset/metadata.csv", index=False)
+six_metadata.to_csv("datasets/correctDatasetSix/metadata.csv", index=False)
