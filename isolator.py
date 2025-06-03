@@ -409,9 +409,9 @@ def process_all_cha_files(default_childes_path):
     print(len(wrong_dataframe))
     print(len(correct_dataframe))
 
-    original_dataframe.to_csv("datasets/cha_data.csv")
-    wrong_dataframe.to_csv("datasets/wrong_data.csv")
-    correct_dataframe.to_csv("datasets/correct_data.csv")
+    original_dataframe.to_csv("datasets/cha_data.csv", index=False)
+    wrong_dataframe.to_csv("datasets/wrong_data.csv", index= False)
+    correct_dataframe.to_csv("datasets/correct_data.csv", index= False)
 
 
 DEBUG = False

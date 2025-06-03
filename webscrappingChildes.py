@@ -93,5 +93,5 @@ def downloader(cookie,url):
 
     
 cookie = "s%3AEnoOE80lGm9qWSHsYTc0d6zkc9GpxSuO.kPlnjpDHDTmMwPeYs3YGm9RMCR0cytI5i4WMRHJOvRE"
-url = "https://media.talkbank.org/childes/Clinical-Other/Zwitserlood/TD/456"
+url = "https://media.talkbank.org/childes/DutchAfrikaans/Asymmetries/CK-TD"
 downloader(cookie=cookie,url=url)

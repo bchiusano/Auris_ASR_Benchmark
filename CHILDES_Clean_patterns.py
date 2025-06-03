@@ -5,7 +5,7 @@ import xlsxwriter
 from collections import defaultdict
 from sastadev.lexicon import known_word
 
-#stamper (grammatical analysis)
+# stamper (grammatical analysis)
 
 # regular expressions used to obtain the wrong words and their corrections
 noncompletionpattern = r'(.*)\((\w*)\)(.*)'
@@ -111,6 +111,7 @@ def gettargetspeaker(metadata):
     result = 'CHI'
     return result
 
+
 def isvalidword(w: str) -> bool:
     '''
     function to determine whether a word is a valid Dutch word
@@ -126,8 +127,8 @@ def isvalidword(w: str) -> bool:
     else:
         return False
 
-def getexplanations(rawutt):
 
+def getexplanations(rawutt):
     '''
     function to obtain the explanations from an utterance
     :param rawutt: str
@@ -141,23 +142,27 @@ def getexplanations(rawutt):
     matches = explanationre.finditer(utt)
     for match in matches:
         wrong = match.group(1)
-        wrong = wrong.replace(".", "").replace("?", "").replace("‹", "").replace("@c", "").replace(">", "").replace("<", "")
+        wrong = wrong.replace(".", "").replace("?", "").replace("‹", "").replace("@c", "").replace(">", "").replace("<",
+                                                                                                                    "")
         correct = match.group(2)
-        correct = correct.replace(".", "").replace("?", "").replace("‹", "").replace("@c", "").replace(">", "").replace("<", "")
+        correct = correct.replace(".", "").replace("?", "").replace("‹", "").replace("@c", "").replace(">", "").replace(
+            "<", "")
         full_match = match.group(0)
-        full_match = full_match.replace(".", "").replace("?", "").replace("‹", "").replace("@c", "").replace(">", "").replace("<", "")
-
+        full_match = full_match.replace(".", "").replace("?", "").replace("‹", "").replace("@c", "").replace(">",
+                                                                                                             "").replace(
+            "<", "")
+        '''
         if len(correct) > 4 \
                 and len(wrong) > 4 \
                 and len(correct.split()) == 1 \
                 and wrong.isalpha() \
-                and not correct[0].isupper()\
-                and wrong != geluid\
-                and wrong != geluid2\
-                and wrong != geluid3\
+                and not correct[0].isupper() \
+                and wrong != geluid \
+                and wrong != geluid2 \
+                and wrong != geluid3 \
                 and isvalidword(wrong) is False:
-            results.append((full_match, wrong, correct))
-
+        '''
+        results.append((full_match, wrong, correct))
 
     return results
 
@@ -172,19 +177,24 @@ def getreplacements(utt):
     matches = replacementre.finditer(utt)
     for match in matches:
         wrong = match.group(1)
-        wrong = wrong.replace(".", "").replace("?", "").replace("‹", "").replace("@c", "").replace(">", "").replace("<", "")
+        wrong = wrong.replace(".", "").replace("?", "").replace("‹", "").replace("@c", "").replace(">", "").replace("<",
+                                                                                                                    "")
         correct = match.group(2)
-        correct = correct.replace(".", "").replace("?", "").replace("‹", "").replace("@c", "").replace(">", "").replace("<", "")
+        correct = correct.replace(".", "").replace("?", "").replace("‹", "").replace("@c", "").replace(">", "").replace(
+            "<", "")
         full_match = match.group(0)
-        full_match = full_match.replace(".", "").replace("?", "").replace("‹", "").replace("@c", "").replace(">", "").replace("<", "")
-
+        full_match = full_match.replace(".", "").replace("?", "").replace("‹", "").replace("@c", "").replace(">",
+                                                                                                             "").replace(
+            "<", "")
+        '''
         if len(correct) > 4 \
                 and len(wrong) > 4 \
                 and len(correct.split()) == 1 \
                 and wrong.isalpha() \
-                and not correct[0].isupper()\
+                and not correct[0].isupper() \
                 and isvalidword(wrong) is False:
-            results.append((full_match, wrong, correct))
+        '''
+        results.append((full_match, wrong, correct))
 
     return results
 
@@ -207,17 +217,21 @@ def getnoncompletions(line):
         if match:
             w = w.replace(".", "").replace("?", "").replace("‹", "").replace("@c", "").replace(">", "").replace("<", "")
             wrong = undononcompletion(w)
-            wrong = wrong.replace(".", "").replace("?", "").replace("‹", "").replace("@c", "").replace(">", "").replace("<", "")
+            wrong = wrong.replace(".", "").replace("?", "").replace("‹", "").replace("@c", "").replace(">", "").replace(
+                "<", "")
             correct = applynoncompletion(w)
-            correct = correct.replace(".", "").replace("?", "").replace("‹", "").replace("@c", "").replace(">", "").replace("<", "")
-
+            correct = correct.replace(".", "").replace("?", "").replace("‹", "").replace("@c", "").replace(">",
+                                                                                                           "").replace(
+                "<", "")
+            '''
             if len(correct) > 4 \
                     and len(wrong) > 4 \
                     and len(correct.split()) == 1 \
                     and wrong.isalpha() \
-                    and not correct[0].isupper()\
+                    and not correct[0].isupper() \
                     and isvalidword(wrong) is False:
-                results.append((w, wrong, correct))
+            '''
+            results.append((w, wrong, correct))
 
     return results
 
@@ -232,7 +246,7 @@ def undononcompletion(word):
     inword = word
     outword = ''
     while True:
-        outword = noncompletionre.sub(r'\1\3', inword)     #  iterate for there may be # multiple occurrences
+        outword = noncompletionre.sub(r'\1\3', inword)  # iterate for there may be # multiple occurrences
         if outword == inword:
             return outword
         else:
@@ -249,34 +263,27 @@ def applynoncompletion(word):
     inword = word
     outword = ''
     while True:
-        outword = noncompletionre.sub(r'\1\2\3', inword)     #  iterate for there may be # multiple occurrences
+        outword = noncompletionre.sub(r'\1\2\3', inword)  # iterate for there may be # multiple occurrences
         if outword == inword:
             return outword
         else:
             inword = outword
 
 
-def clean_annotation_patterns(line):
-    """
-    Function to extract, clean patterns from a line and replace them in the line.
-    :param line: str
-    :return: str, cleaned line
-    """
-    _, explanations = getexplanations(line)
-    _, replacements = getreplacements(line)
-    _, noncompletions = getnoncompletions(line)
+def replace_match_wrong(line, to_correct):
+    print(to_correct)
+    for match, wrong, correct in to_correct:
+        wrong_replace = line.replace(match, wrong)
 
-    # Process and replace patterns in the line
-    for match, wrong in explanations:
-      line = line.replace(match, wrong)
+    return wrong_replace
 
-    for match, wrong in replacements:
-        line = line.replace(match, wrong)
 
-    for match, wrong in noncompletions:
-        line = line.replace(match, wrong)
+def replace_match_correct(line, to_correct):
+    print(to_correct)
+    for match, wrong, correct in to_correct:
+        correct_replace = line.replace(match, correct)
 
-    return line
+    return correct_replace
 
 
 def clean_chat_patterns_only(utterances, targetspeaker):
@@ -288,6 +295,8 @@ def clean_chat_patterns_only(utterances, targetspeaker):
     """
 
     patterns = []
+    wrong_utterances = []
+    correct_utterances = []
 
     # Step 2: Process each utterance
     for utterance in utterances:
@@ -299,12 +308,38 @@ def clean_chat_patterns_only(utterances, targetspeaker):
             replacements_results = getreplacements(utterance)
             noncompletions_results = getnoncompletions(utterance)
 
+            if DEBUG:
+                print("explanations ", explanations_results)
+                print("replacements ", replacements_results)
+                print("non completions ", noncompletions_results)
             # Collect all (pattern, wrong, correct) tuples
             patterns.extend(explanations_results)
             patterns.extend(replacements_results)
             patterns.extend(noncompletions_results)
 
-    return patterns  # List of tuples (pattern, wrong, correct)
+            print("Utterance Before: ", utterance)
+
+            wrong = utterance
+
+            if explanations_results or replacements_results or noncompletions_results:
+
+                temp_collector = [explanations_results, replacements_results, noncompletions_results]
+
+                for result in temp_collector:
+                    if result:
+                        wrong = replace_match_wrong(utterance, result)
+                        correct = replace_match_correct(utterance, result)
+                        print("Utterance Explanation wrong: ", wrong)
+                        print("Utterance Explanation correct: ", correct)
+
+            if wrong != utterance:
+                wrong_utterances.append(wrong)
+                correct_utterances.append(correct)
+            else:
+                wrong_utterances.append(utterance)
+                correct_utterances.append(utterance)
+
+    return patterns, wrong_utterances, correct_utterances  # List of tuples (pattern, wrong, correct)
 
 
 def process_all_cha_files(defaultchildespath, output_xlsx_path):
@@ -333,7 +368,9 @@ def process_all_cha_files(defaultchildespath, output_xlsx_path):
             targetspeaker = gettargetspeaker(headerdata)
 
             # Step 2: Extract patterns from the file
-            patterns = clean_chat_patterns_only(utterances, targetspeaker)
+            patterns, wrong_cleaned, correct_cleaned = clean_chat_patterns_only(utterances, targetspeaker)
+            print(wrong_cleaned)
+            print(correct_cleaned)
 
             # Step 3: Update the dictionary with pattern frequencies
             for pattern in patterns:
@@ -342,6 +379,7 @@ def process_all_cha_files(defaultchildespath, output_xlsx_path):
 
     # Step 4: Sort the patterns by frequency in descending order
     sorted_patterns = sorted(pattern_freq_dict.items(), key=lambda x: x[1], reverse=True)
+
 
     # Step 5: Write the sorted pattern frequencies to the Excel file
     # Create a workbook and add a worksheet
@@ -361,17 +399,15 @@ def process_all_cha_files(defaultchildespath, output_xlsx_path):
         worksheet.write(row, 0, pattern_tuple[0])  # Pattern
         worksheet.write(row, 1, pattern_tuple[1])  # Wrong
         worksheet.write(row, 2, pattern_tuple[2])  # Correct
-        worksheet.write(row, 3, frequency)         # Frequency
+        worksheet.write(row, 3, frequency)  # Frequency
 
         row += 1  # Move to the next row
 
     workbook.close()  # Save the Excel file
 
 
-defaultchildespath = 'CHILDES'
+
+DEBUG = False
+defaultchildespath = 'Asymmetries/CK-TD'
 output_xlsx_path = "Patterns_CHILDES.xlsx"
 process_all_cha_files(defaultchildespath, output_xlsx_path)
-
-
-
-
