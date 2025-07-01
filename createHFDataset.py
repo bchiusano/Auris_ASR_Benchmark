@@ -16,8 +16,7 @@ def upload(dataset_repo, subset_name, hf_audios, hf_titles, audio_utterances):
 
 
 class CreateHFData:
-    def __init__(self, path_audio, data_csv, audio_output, metadata_output, debug):
-        self.path_audio = path_audio
+    def __init__(self, data_csv, audio_output, metadata_output, debug):
         self.data_csv = data_csv
         self.audio_output = audio_output
         self.metadata_output = metadata_output
@@ -67,9 +66,16 @@ class CreateHFData:
                 stamp = timestamps_list[pos]
                 start = int(stamp[0])
                 end = int(stamp[1])
+
                 audio_chunk = audio[start:end]
 
                 save_title = "audio_{name}_{s}_{e}.mp3".format(name=title_name, s=start, e=end)
+
+                if title_name == "c21":
+                    print(utterance)
+                    print(start)
+                    print(end)
+                    print(save_title)
 
                 if len(utterance.split()) > 5:
                     path_to_audio = (self.audio_output + save_title).format(six="Six")
@@ -120,15 +126,14 @@ for i in range(len(paths_to_data)):
     path_to_metadata_output = paths_metadata_output[i]
     subset = subsets[i]
 
-    create_database = CreateHFData(path_audio=path_to_audio_output,
-                                   data_csv=data,
+    create_database = CreateHFData(data_csv=data,
                                    audio_output=path_to_audio_output,
                                    metadata_output=path_to_metadata_output,
-                                   debug=True)
+                                   debug=False)
 
     audios, names, transcripts, audios_six, names_six, transcripts_six = create_database.split_audio()
 
-    upload(dataset_repo=hf_dataset_repo, subset_name=subset[0], hf_audios=audios, hf_titles=names,
-           audio_utterances=transcripts)
-    upload(dataset_repo=hf_dataset_repo, subset_name=subset[1], hf_audios=audios_six, hf_titles=names_six,
-           audio_utterances=transcripts_six)
+    # upload(dataset_repo=hf_dataset_repo, subset_name=subset[0], hf_audios=audios, hf_titles=names,
+    #       audio_utterances=transcripts)
+    # upload(dataset_repo=hf_dataset_repo, subset_name=subset[1], hf_audios=audios_six, hf_titles=names_six,
+    #       audio_utterances=transcripts_six)
