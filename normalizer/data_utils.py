@@ -1,7 +1,7 @@
 from datasets import load_dataset, Audio
 from normalizer import BasicTextNormalizer
 
-from .eval_utils import read_manifest, write_manifest, create_excel
+from .eval_utils import read_manifest, write_manifest
 
 normalizer = BasicTextNormalizer()
 

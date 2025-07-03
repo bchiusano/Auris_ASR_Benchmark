@@ -77,8 +77,6 @@ def main(args):
         benchmark, batch_size=args.batch_size, batched=True, remove_columns=["audio"],
     )
 
-    data_utils.create_excel(results, dataset, args.excel_output)
-
     # Post-processing - delete weird results
     del_idx = []
     for i in range(len(results)):

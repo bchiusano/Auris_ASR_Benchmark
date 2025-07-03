@@ -7,24 +7,6 @@ import pandas as pd
 from collections import defaultdict
 
 
-def create_excel(result, data, output_path):
-    records = []
-
-    for i in range(len(result)):
-        record = {
-            'Index': i,
-            'File Name': data[i]['file_name'],
-            'Original Transcript': data[i]['transcript'],
-            'Reference': result[i]['references'],
-            'Prediction': result[i]['predictions']
-        }
-        records.append(record)
-
-    df = pd.DataFrame(records)
-    df.to_excel(output_path, index=False)
-    print(f"Results saved to {output_path}")
-
-
 def read_manifest(manifest_path: str):
     """
     Reads a manifest file (jsonl format) and returns a list of dictionaries containing samples.
@@ -225,3 +207,7 @@ def score_results(directory: str, model_id: str = None):
             print(f"{k}: RTFx = {rtfx:0.2f}")
     print("*" * 80)
     return composite_wer, results
+
+
+# very useful to print results
+print(score_results("../results/"))
