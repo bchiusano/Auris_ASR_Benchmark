@@ -414,5 +414,5 @@ def process_all_cha_files(default_childes_path):
 
 
 DEBUG = False
-default_childes_path = 'Asymmetries/CK-TD'
+default_childes_path = '../Asymmetries/CK-TD'
 process_all_cha_files(default_childes_path)

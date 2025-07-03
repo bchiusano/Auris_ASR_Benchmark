@@ -13,7 +13,7 @@ def downloader(cookie,url):
 
     #Building the path name for the output directory
     path = url.split("/")
-    output_dir = "./CHILDES Downloads"
+    output_dir = "../CHILDES Downloads"
     for e in path:
         if path.index(e) > path.index("childes"):
             output_dir += ("/"+e)
