@@ -109,6 +109,14 @@ def score_results(directory: str, model_id: str = None):
         Composite score over all evaluated datasets and a dictionary of all results.
     """
 
+    # DataFrames to save results for UI
+    models = []
+    datasets = []
+    wers = []
+    rtfxs = []
+    composite_wers = []
+    composite_rftxs = []
+
     # Strip trailing slash
     if directory.endswith(os.pathsep):
         directory = directory[:-1]
@@ -148,6 +156,9 @@ def score_results(directory: str, model_id: str = None):
         manifest = read_manifest(result_file)
         model_id_of_file, dataset_id = parse_filepath(result_file)
 
+        models.append(model_id_of_file)
+        datasets.append(dataset_id)
+
         references = [datum["text"] for datum in manifest]
         predictions = [datum["pred_text"] for datum in manifest]
 
@@ -177,6 +188,9 @@ def score_results(directory: str, model_id: str = None):
         if v["rtfx"] is not None:
             metrics += f", RTFx = {v['rtfx']:0.2f}"
         print(metrics)
+        wers.append(f"{v['wer']:0.2f} %")
+        rtfxs.append(f"{v['rtfx']:0.2f}")
+
 
     # composite WER should be computed over all datasets and with the same key
     composite_wer = defaultdict(float)
@@ -198,16 +212,28 @@ def score_results(directory: str, model_id: str = None):
     print("*" * 80)
     print("Composite Results:")
     print("*" * 80)
+    unique_models = list(set(models))
     for k, v in composite_wer.items():
         wer = v / count_entries[k]
         print(f"{k}: WER = {wer:0.2f} %")
+        composite_wers.append(f"{wer:0.2f} %")
+
     for k in composite_audio_length:
         if composite_audio_length[k] is not None:
             rtfx = composite_audio_length[k] / composite_inference_time[k]
             print(f"{k}: RTFx = {rtfx:0.2f}")
+            composite_rftxs.append(f"{rtfx:0.2f}")
     print("*" * 80)
-    return composite_wer, results
+
+    all_df = pd.DataFrame({"model": models, "dataset": datasets, "WER": wers, "RTFX": rtfxs})
+    composite_df = pd.DataFrame({"model": unique_models, "WER": composite_wers, "RTFX": composite_rftxs})
+
+    return composite_wer, results, all_df, composite_df
 
 
 # very useful to print results
 print(score_results("../results/"))
+composite_wer, results, all_df, composite_df = score_results("../results/")
+print(all_df)
+print(composite_df)
+
