@@ -97,16 +97,18 @@ def write_manifest(
     return manifest_path
 
 
-def score_results(directory: str, model_id: str = None):
+def score_results(directory: str, model_id: str = None, DEBUG: bool = True):
     """
     Scores all result files in a directory and returns a composite score over all evaluated datasets.
 
     Args:
         directory: Path to the result directory, containing one or more jsonl files.
         model_id: Optional, model name to filter out result files based on model name.
+        DEBUG: Optional, printing scores
 
     Returns:
         Composite score over all evaluated datasets and a dictionary of all results.
+
     """
 
     # DataFrames to save results for UI
@@ -116,6 +118,7 @@ def score_results(directory: str, model_id: str = None):
     rtfxs = []
     composite_wers = []
     composite_rftxs = []
+    unique_models = []
 
     # Strip trailing slash
     if directory.endswith(os.pathsep):
@@ -179,18 +182,18 @@ def score_results(directory: str, model_id: str = None):
         result_key = f"{model_id_of_file} | {dataset_id}"
         results[result_key] = {"wer": wer, "audio_length": audio_length, "inference_time": inference_time, "rtfx": rtfx}
 
-    print("*" * 80)
-    print("Results per dataset:")
-    print("*" * 80)
+    if DEBUG:
+        print("*" * 80)
+        print("Results per dataset:")
+        print("*" * 80)
 
     for k, v in results.items():
         metrics = f"{k}: WER = {v['wer']:0.2f} %"
         if v["rtfx"] is not None:
             metrics += f", RTFx = {v['rtfx']:0.2f}"
-        print(metrics)
+        if DEBUG: print(metrics)
         wers.append(f"{v['wer']:0.2f} %")
         rtfxs.append(f"{v['rtfx']:0.2f}")
-
 
     # composite WER should be computed over all datasets and with the same key
     composite_wer = defaultdict(float)
@@ -208,22 +211,24 @@ def score_results(directory: str, model_id: str = None):
         count_entries[key] += 1
 
     # normalize scores & print
-    print()
-    print("*" * 80)
-    print("Composite Results:")
-    print("*" * 80)
-    unique_models = list(set(models))
+    if DEBUG:
+        print()
+        print("*" * 80)
+        print("Composite Results:")
+        print("*" * 80)
+    #unique_models = list(set(models))
     for k, v in composite_wer.items():
         wer = v / count_entries[k]
-        print(f"{k}: WER = {wer:0.2f} %")
+        if DEBUG: print(f"{k}: WER = {wer:0.2f} %")
         composite_wers.append(f"{wer:0.2f} %")
+        unique_models.append(k)
 
     for k in composite_audio_length:
         if composite_audio_length[k] is not None:
             rtfx = composite_audio_length[k] / composite_inference_time[k]
-            print(f"{k}: RTFx = {rtfx:0.2f}")
+            if DEBUG: print(f"{k}: RTFx = {rtfx:0.2f}")
             composite_rftxs.append(f"{rtfx:0.2f}")
-    print("*" * 80)
+    # print("*" * 80)
 
     all_df = pd.DataFrame({"model": models, "dataset": datasets, "WER": wers, "RTFX": rtfxs})
     composite_df = pd.DataFrame({"model": unique_models, "WER": composite_wers, "RTFX": composite_rftxs})
@@ -232,8 +237,6 @@ def score_results(directory: str, model_id: str = None):
 
 
 # very useful to print results
-print(score_results("../results/"))
 composite_wer, results, all_df, composite_df = score_results("../results/")
 print(all_df)
 print(composite_df)
-
