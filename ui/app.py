@@ -20,11 +20,19 @@ with gr.Blocks() as demo:
     with gr.Tabs(elem_classes="tab-buttons") as tabs:
 
         with gr.TabItem("All Tests"):
+
+            gr.Markdown("## Stats")
             with gr.Row():
                 gr.Label(f"{min(numeric_wer)}%", label="Lowest WER")
                 gr.Label(f"{min(numeric_rtfx)}", label="Lowest RTFX")
 
+            gr.Markdown("## Benchmark")
             gr.DataFrame(all_df)
+
+            gr.Markdown("Filter Examples")
+            #print(composite_df['model'].tolist())
+            with gr.Row():
+                models = gr.Dropdown(composite_df['model'].tolist(), value="All", label="Models", allow_custom_value=True)
 
         with gr.TabItem("Composite Results"):
             gr.DataFrame(composite_df)

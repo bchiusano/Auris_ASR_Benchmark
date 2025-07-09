@@ -97,7 +97,7 @@ def write_manifest(
     return manifest_path
 
 
-def score_results(directory: str, model_id: str = None, DEBUG: bool = True):
+def score_results(directory: str, model_id: str = None, DEBUG: bool = False):
     """
     Scores all result files in a directory and returns a composite score over all evaluated datasets.
 
