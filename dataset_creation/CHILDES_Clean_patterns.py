@@ -351,14 +351,15 @@ def process_all_cha_files(defaultchildespath, output_xlsx_path):
     """
     # Dictionary to store pattern frequencies across all files
     pattern_freq_dict = defaultdict(int)
-
+    print("HELLO")
     # Step 1: Walk through the directory to process .cha files
     for root, dirs, thefiles in os.walk(defaultchildespath):
         print(f'Processing {root}...', file=sys.stderr)
 
         # We only want the filenames with extension *cha* except ital.cha
         chafiles = [f for f in thefiles if f.endswith('.cha') and not f.endswith('-ital.cha')]
-
+        print("HELLO")
+        print(len(chafiles))
         for infilename in chafiles:
             print(infilename)
             infullname = os.path.join(root, infilename)
@@ -407,7 +408,7 @@ def process_all_cha_files(defaultchildespath, output_xlsx_path):
 
 
 
-DEBUG = False
-defaultchildespath = 'Asymmetries/CK-TD'
-output_xlsx_path = "Patterns_CHILDES.xlsx"
-process_all_cha_files(defaultchildespath, output_xlsx_path)
+DEBUG = True
+childesPath = '../Asymmetries/SK-ADHD'
+output_xlsx_path = "Patterns_CHILDES_SK_ADHD.xlsx"
+process_all_cha_files(childesPath, output_xlsx_path)

@@ -114,13 +114,14 @@ class CreateHFData:
         six_metadata.to_csv((self.metadata_output + "metadata.csv").format(six="Six"), index=False)
 
 
-path_to_audio_files = "../CHILDES Downloads/DutchAfrikaans/Asymmetries/CK-TD/"
-paths_to_data = ["csvs/wrong_data.csv", "csvs/correct_data.csv"]
-paths_audio_output = ["datasets/wrongDataset{six}/Asymmetries/", "datasets/correctDataset{six}/Asymmetries/"]
-paths_metadata_output = ["datasets/wrongDataset{six}/", "datasets/correctDataset{six}/"]
-subsets = [["wrongPatterns", "wrongPatternsSix"], ["correctPatterns", "correctPatternsSix"]]
+# THINGS TO CHANGE BASED ON WHAT DATASET TO UPLOAD - CK-TD, SK-TD, SK-ADHD
+path_to_audio_files = "../CHILDES Downloads/DutchAfrikaans/Asymmetries/SK-ADHD/"
+paths_to_data = ["csvs/sk-adhd-csvs/wrong_data.csv", "csvs/sk-adhd-csvs/correct_data.csv"]
+paths_audio_output = ["datasets/sk-adhd-datasets/wrongDataset{six}/Asymmetries/", "datasets/sk-adhd-datasets/correctDataset{six}/Asymmetries/"]
+paths_metadata_output = ["datasets/sk-adhd-datasets/wrongDataset{six}/", "datasets/sk-adhd-datasets/correctDataset{six}/"]
+subsets = [["SK-ADHD-W", "SK-ADHD-W-S"], ["SK-ADHD-C", "SK-ADHD-C-S"]]
 
-hf_dataset_repo = "bchiusano/NewAsymmetriesCHILDES"
+hf_dataset_repo = "bchiusano/AllAsymmetriesCHILDES"
 
 for i in range(len(paths_to_data)):
     data = pd.read_csv(paths_to_data[i])

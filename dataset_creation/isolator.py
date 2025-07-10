@@ -408,11 +408,11 @@ def process_all_cha_files(default_childes_path):
     print(len(wrong_dataframe))
     print(len(correct_dataframe))
 
-    original_dataframe.to_csv("csvs/cha_data.csv", index=False)
-    wrong_dataframe.to_csv("csvs/wrong_data.csv", index=False)
-    correct_dataframe.to_csv("csvs/correct_data.csv", index=False)
+    original_dataframe.to_csv("csvs/sk-adhd-csvs/cha_data.csv", index=False)
+    wrong_dataframe.to_csv("csvs/sk-adhd-csvs/wrong_data.csv", index=False)
+    correct_dataframe.to_csv("csvs/sk-adhd-csvs/correct_data.csv", index=False)
 
 
 DEBUG = False
-default_childes_path = '../Asymmetries/CK-TD'
+default_childes_path = '../Asymmetries/SK-ADHD'
 process_all_cha_files(default_childes_path)

@@ -92,6 +92,7 @@ def downloader(cookie,url):
             print(f"Error downloading {file_name}: {e}")
 
     
-cookie = "s%3AEnoOE80lGm9qWSHsYTc0d6zkc9GpxSuO.kPlnjpDHDTmMwPeYs3YGm9RMCR0cytI5i4WMRHJOvRE"
-url = "https://media.talkbank.org/childes/DutchAfrikaans/Asymmetries/CK-TD"
+cookie = "s%3AMfIgecmlswqo1vAb2SRoFfjF2nySLiRM.YF86yQREN4D7yONzSM5RTBeqBiKoc8dn4Rdo4ApAwYg"
+url = "https://media.talkbank.org/childes/DutchAfrikaans/Asymmetries/SK-TD"
+#url = "https://media.talkbank.org/asd/Dutch/Asymmetries"
 downloader(cookie=cookie,url=url)
