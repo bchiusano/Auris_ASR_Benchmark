@@ -4,6 +4,7 @@ from constants import TITLE, INTRODUCTION_TEXT, AURIS_ORIGINAL_DESCRIPTION, METR
 
 
 _, _, all_df, composite_df = score_results("../results/")
+#_, _, all_df, composite_df = score_results("../results/small/")
 
 # TODO: User can see some examples of reference vs prediction
 
@@ -26,7 +27,7 @@ with gr.Blocks() as demo:
             gr.Markdown("## Stats")
             with gr.Row():
                 gr.Label(f"{min(numeric_wer)}%", label="Lowest WER")
-                gr.Label(f"{min(numeric_rtfx)}", label="Lowest RTFX")
+                gr.Label(f"{max(numeric_rtfx)}", label="Highest RTFX")
 
             gr.Markdown("## Benchmark")
             gr.DataFrame(all_df)
