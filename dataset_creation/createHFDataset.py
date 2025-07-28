@@ -14,11 +14,43 @@ def upload(dataset_repo, subset_name, hf_audios, hf_titles, audio_utterances):
     audio_dataset.push_to_hub(dataset_repo, subset_name)
 
 
+def upload_clean_audio():
+    ck_td_meta = pd.read_csv('datasets/ck-td-datasets/dataSix/metadata.csv')
+    sk_td_meta = pd.read_csv('datasets/sk-td-datasets/dataSix/metadata.csv')
+    sk_adhd_meta = pd.read_csv('datasets/sk-adhd-datasets/dataSix/metadata.csv')
+
+    metas = [ck_td_meta, sk_td_meta, sk_adhd_meta]
+    audio_roots = ['datasets/ck-td-datasets/dataSix/clean/', 'datasets/sk-td-datasets/dataSix/clean/',
+                   'datasets/sk-adhd-datasets/dataSix/clean/']
+    clean_hf_dataset_repo = "bchiusano/CleanAsymmetriesCHILDES"
+    clean_subsets = ['CK-TD', 'SK-TD', 'SK-ADHD']
+
+    for i in range(len(metas)):
+        hf_audios = []
+        hf_transcripts = []
+        for root, dirs, thefiles in os.walk(audio_roots[i]):
+            for file in thefiles:
+                transcript = metas[i].loc[metas[i]['file_name'] == file, 'transcript'].values
+                if len(transcript) > 0:
+                    hf_audios.append(audio_roots[i] + file)
+                    hf_transcripts.append(transcript[0])
+                else:
+                    print("Audio file not found.", file)
+
+        audio_dataset = Dataset.from_dict({"audio": hf_audios,
+                                           "transcript": hf_transcripts}).cast_column("audio", Audio())
+        audio_dataset.push_to_hub(clean_hf_dataset_repo, clean_subsets[i])
+
+
+upload_clean_audio()
+
+
 class CreateHFData:
-    def __init__(self, data_csv, audio_output, metadata_output, debug):
+    def __init__(self, data_csv, audio_input, audio_output, debug):
         self.data_csv = data_csv
+        self.audio_input = audio_input
         self.audio_output = audio_output
-        self.metadata_output = metadata_output
+        #self.metadata_output = metadata_output
         self.debug = debug
 
     def split_audio(self):
@@ -52,7 +84,7 @@ class CreateHFData:
             title_name = file_name.replace(".cha", "")
 
             # AUDIO
-            audio_file = path_to_audio_files + cleaned_name
+            audio_file = self.audio_input + cleaned_name
 
             if self.debug: print(audio_file)
 
@@ -81,7 +113,8 @@ class CreateHFData:
 
                 if len(utterance.split()) > 5:
                     path_to_audio = (self.audio_output + save_title).format(six="Six")
-                    audio_chunk.export(path_to_audio, format="mp3")
+                    if not os.path.exists(path_to_audio):
+                        audio_chunk.export(path_to_audio, format="mp3")
 
                     six_audio_names.append(save_title)
                     six_audio_utterances.append(utterance)
@@ -89,13 +122,14 @@ class CreateHFData:
                     hf_titles_six.append(cleaned_name)
 
                 path_to_audio = (self.audio_output + save_title).format(six="")
-                audio_chunk.export(path_to_audio, format="mp3")
+                if not os.path.exists(path_to_audio):
+                    audio_chunk.export(path_to_audio, format="mp3")
                 all_audio_names.append(save_title)
                 all_audio_utterances.append(utterance)
                 hf_audios_all.append(path_to_audio)
                 hf_titles_all.append(cleaned_name)
 
-        self.add_metadata(all_audio_names, all_audio_utterances, six_audio_names, six_audio_utterances)
+        # self.add_metadata(all_audio_names, all_audio_utterances, six_audio_names, six_audio_utterances)
 
         return hf_audios_all, hf_titles_all, all_audio_utterances, hf_audios_six, hf_titles_six, six_audio_utterances
 
@@ -113,25 +147,23 @@ class CreateHFData:
         six_metadata['transcript'] = six_audio_utterances
         six_metadata.to_csv((self.metadata_output + "metadata.csv").format(six="Six"), index=False)
 
-
+'''
 # THINGS TO CHANGE BASED ON WHAT DATASET TO UPLOAD - CK-TD, SK-TD, SK-ADHD
 path_to_audio_files = "../CHILDES Downloads/DutchAfrikaans/Asymmetries/SK-ADHD/"
 paths_to_data = ["csvs/sk-adhd-csvs/wrong_data.csv", "csvs/sk-adhd-csvs/correct_data.csv"]
-paths_audio_output = ["datasets/sk-adhd-datasets/wrongDataset{six}/Asymmetries/", "datasets/sk-adhd-datasets/correctDataset{six}/Asymmetries/"]
-paths_metadata_output = ["datasets/sk-adhd-datasets/wrongDataset{six}/", "datasets/sk-adhd-datasets/correctDataset{six}/"]
+paths_audio_output = "datasets/sk-adhd-datasets/data{six}/Asymmetries/"
+# paths_metadata_output = ["datasets/sk-adhd-datasets/data{six}/", "datasets/sk-adhd-datasets/data{six}/"]
 subsets = [["SK-ADHD-W", "SK-ADHD-W-S"], ["SK-ADHD-C", "SK-ADHD-C-S"]]
 
 hf_dataset_repo = "bchiusano/AllAsymmetriesCHILDES"
 
 for i in range(len(paths_to_data)):
     data = pd.read_csv(paths_to_data[i])
-    path_to_audio_output = paths_audio_output[i]
-    path_to_metadata_output = paths_metadata_output[i]
     subset = subsets[i]
 
     create_database = CreateHFData(data_csv=data,
-                                   audio_output=path_to_audio_output,
-                                   metadata_output=path_to_metadata_output,
+                                    audio_input = path_to_audio_files,
+                                   audio_output=paths_audio_output,
                                    debug=True)
 
     audios, names, transcripts, audios_six, names_six, transcripts_six = create_database.split_audio()
@@ -140,3 +172,4 @@ for i in range(len(paths_to_data)):
            audio_utterances=transcripts)
     upload(dataset_repo=hf_dataset_repo, subset_name=subset[1], hf_audios=audios_six, hf_titles=names_six,
            audio_utterances=transcripts_six)
+'''

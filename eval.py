@@ -86,7 +86,7 @@ def write_manifest(
         else len(references) * [None]
     )
 
-    basedir = "./results/"
+    basedir = "./results/clean/"
     if not os.path.exists(basedir):
         os.makedirs(basedir)
 
@@ -372,19 +372,18 @@ def benchmark(batch):
 # Constants
 wer_metric = load("wer")
 
-model = WhisperForConditionalGeneration.from_pretrained("openai/whisper-medium")
-processor = WhisperProcessor.from_pretrained("openai/whisper-medium")
+model = WhisperForConditionalGeneration.from_pretrained("openai/whisper-small")
+processor = WhisperProcessor.from_pretrained("openai/whisper-small")
 
 
 # CK-TD, SK-TD, SK-ADHD
-#all_subsets = ["CK-TD-W-S", "CK-TD-C-S", "SK-TD-W-S", "SK-TD-C-S", "SK-ADHD-W-S", "SK-ADHD-C-S"]
-all_subsets = ["SK-TD-W-S", "SK-TD-C-S", "SK-ADHD-W-S", "SK-ADHD-C-S"]
+all_subsets = ["CK-TD-W-S", "CK-TD-C-S", "SK-TD-W-S", "SK-TD-C-S", "SK-ADHD-W-S", "SK-ADHD-C-S"]
 
 for subset in all_subsets:
 
     args = SimpleNamespace(
-        model_id="openai/whisper-medium",
-        dataset_path="bchiusano/AllAsymmetriesCHILDES",
+        model_id="openai/whisper-small",
+        dataset_path="bchiusano/CleanAsymmetriesCHILDES",
         dataset=subset,
         batch_size=16,
         streaming=False,

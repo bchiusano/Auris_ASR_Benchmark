@@ -35,6 +35,8 @@ with gr.Blocks() as demo:
         with gr.TabItem("Composite Results"):
             gr.Markdown("## Average per Model")
             gr.DataFrame(composite_df)
+            # TODO: add a bar chart
+            # TODO: make sure that results are being displayed directly with the lowest WER at the top
 
         with gr.TabItem("Filter Examples"):
             gr.Markdown("## Filter Examples")
