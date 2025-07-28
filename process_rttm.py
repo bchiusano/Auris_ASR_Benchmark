@@ -1,3 +1,8 @@
+import os
+import re
+from dataset_creation.isolator import get_chat_data, get_target_speaker, clean_chat_patterns_only
+from chamd.cleanCHILDESMD import cleantext
+
 def get_speaker_continuous_segments(rttm_file, target_speaker="SPEAKER_00"):
     """
     Extract continuous speaking segments for a specific speaker.
@@ -70,16 +75,11 @@ def get_speaker_continuous_segments(rttm_file, target_speaker="SPEAKER_00"):
     return continuous_segments
 
 
-# Usage example
-if __name__ == "__main__":
-    file = "trail.rttm"
-    target = "SPEAKER_00"
-    speaker_00_segments = get_speaker_continuous_segments(file, target)
-
-    print(f"Found {len(speaker_00_segments)} continuous speaking segments for {target}:")
+def print_segments(segments):
+    print(f"Found {len(segments)} continuous speaking segments for {target}:")
     print("=" * 70)
 
-    for segment in speaker_00_segments:
+    for segment in segments:
         start_time = int(segment['start'] * 1000)
         end_time = int(segment['end'] * 1000)
         duration = int(segment['duration'] * 1000)
@@ -89,3 +89,71 @@ if __name__ == "__main__":
         print(f"  End:   {end_time} ({segment['end']:.3f}s)")
         print(f"  Duration: {duration} ({segment['duration']:.3f}s)")
         print("-" * 50)
+
+
+
+if __name__ == "__main__":
+    folder = "rttms"
+    target = "SPEAKER_00"
+
+    for file in os.listdir(folder):
+        if not file.endswith('.rttm'):
+            continue
+
+        file_path = os.path.join(folder, file)
+        print(f"Processing {file_path} for target {target}...")
+
+        # Get continuous segments for the target speaker
+        speaker_00_segments = get_speaker_continuous_segments(file_path, target)
+        print_segments(speaker_00_segments)
+
+        for segment in speaker_00_segments:
+            start_time = int(segment['start'] * 1000)
+            end_time = int(segment['end'] * 1000)
+
+
+def process_child_utt_segments(target, text_list):
+    """
+    Process a list of CHI or KIN entries and merge consecutive Child utterances,
+
+    Args:
+        text_list: utterances
+    
+    Returns:
+        List of dictionaries with segment information
+    """
+    
+    segments = []
+    continuous = ""
+    for i, text in enumerate(text_list):
+
+        if text.startswith(f"*{target}:"):
+
+            clean_ts = re.sub(rf'\*{target}:\t|\x15\d+_\d+\x15|\[//\]|\n|[<>()]', '', text)
+            sasta_clean = cleantext(clean_ts, False)
+            cleaned_text = re.sub(' +', ' ', sasta_clean.replace(".", ""))
+            continuous = continuous + " " + cleaned_text.strip()
+        else:
+            if continuous != "":
+                segments.append(continuous)
+                continuous = ""
+    # TODO: handle if the child is the last utterance
+    
+    return segments
+
+
+dir = r"C:\Users\b.caissottidichiusan\OneDrive - Stichting Onderwijs Koninklijke Auris Groep - 01JO\Desktop\fiveTDTranscripts"
+
+#for file in os.listdir(dir):
+#    if not file.endswith('.cha'):
+#        continue
+file = "P108_SPONTAAL_M1_cht.cha"
+file_path = os.path.join(dir, file)
+
+header_data, utterances = get_chat_data(file_path)
+target_speaker = get_target_speaker(header_data)
+#wrong_cleaned, correct_cleaned = clean_chat_patterns_only(utterances, target_speaker, DEBUG=True)
+merged_segments = process_child_utt_segments(target_speaker, utterances)
+print(merged_segments)
+
+# TODO: merge utterances with timestamps
