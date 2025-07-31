@@ -72,7 +72,7 @@ def get_speaker_continuous_segments(rttm_file, target_speaker="SPEAKER_00"):
 
 # Usage example
 if __name__ == "__main__":
-    file = "trail.rttm"
+    file = ""
     target = "SPEAKER_00"
     speaker_00_segments = get_speaker_continuous_segments(file, target)
 
