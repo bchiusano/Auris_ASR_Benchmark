@@ -3,10 +3,8 @@ import pandas as pd
 
 from normalizer.eval_utils import score_results
 from constants import TITLE, INTRODUCTION_TEXT, AURIS_ORIGINAL_DESCRIPTION, METRICS_TEXT, WER, RTFX, GITHUB_REPO
-import json
 
 _, _, all_df, composite_df = score_results("../results/")
-# _, _, all_df, composite_df = score_results("../results/small/")
 
 numeric_wer = []
 numeric_rtfx = []

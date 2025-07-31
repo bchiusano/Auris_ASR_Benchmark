@@ -1,9 +1,9 @@
 import os
 import re
-import sys
 import pandas as pd
 from dataset_creation.isolator import get_chat_data, get_target_speaker
 from chamd.cleanCHILDESMD import cleantext
+
 
 def parse_rttm_file(rttm_file):
     # Parse RTTM file
@@ -26,7 +26,7 @@ def parse_rttm_file(rttm_file):
 def get_all_speakers(segments):
     unique_speakers = list(set(segment['speaker'] for segment in segments))
     unique_speakers.sort()  # Sort for consistent order
-    
+
     print(f"Found {len(unique_speakers)} unique speakers: {unique_speakers}")
 
     return unique_speakers
@@ -108,8 +108,6 @@ def get_speaker_continuous_segments(segments, target_speaker):
 
     return continuous_segments
 
-    
-
 
 def process_child_utt_segments(target, text_list):
     """
@@ -121,7 +119,7 @@ def process_child_utt_segments(target, text_list):
     Returns:
         List of dictionaries with segment information
     """
-    
+
     segments = []
     continuous = ""
     for i, text in enumerate(text_list):
@@ -134,10 +132,10 @@ def process_child_utt_segments(target, text_list):
             cleaned_text = cleaned_text.strip().replace(",", "")
             continuous = continuous + " " + cleaned_text.strip()
         else:
-            if continuous != "" :
+            if continuous != "":
                 segments.append(continuous)
                 continuous = ""
-    
+
     return segments
 
 
@@ -150,12 +148,11 @@ def print_segments(segments):
         end_time = int(segment['end'] * 1000)
         duration = int(segment['duration'] * 1000)
 
-        #print(f"Segment {segment['segment_number']}:")
+        # print(f"Segment {segment['segment_number']}:")
         print(f"  Start: {start_time} ({segment['start']:.3f}s)")
         print(f"  End:   {end_time} ({segment['end']:.3f}s)")
         print(f"  Duration: {duration} ({segment['duration']:.3f}s)")
         print("-" * 50)
-
 
 
 if __name__ == "__main__":
@@ -168,7 +165,6 @@ if __name__ == "__main__":
     list_utterances = []
     csv_dir = "rttms/csvs"
     metadata = pd.DataFrame(columns=["filename", "utterances", "timestamps"])
-
 
     for file in os.listdir(folder):
 
@@ -185,7 +181,7 @@ if __name__ == "__main__":
 
         # list of child utterances
         merged_segments = process_child_utt_segments(target_speaker, utterances)
-        #print(merged_segments)
+        # print(merged_segments)
         print("utt: ", len(merged_segments))
         list_utterances.append(merged_segments)
 
@@ -193,36 +189,34 @@ if __name__ == "__main__":
         # Process the RTTM of the audio file
 
         audio_file_path = os.path.join(folder, file)
-        
-        segments = parse_rttm_file(audio_file_path)
-        #print(segments)
 
-    
+        segments = parse_rttm_file(audio_file_path)
+        # print(segments)
+
         print(f"Processing {audio_file_path} for target {target}...")
 
         speaker_segments = get_speaker_continuous_segments(segments, str(target))
-        #print_segments(speaker_segments)
-        
+        # print_segments(speaker_segments)
+
         # list of segments with start and end time converted to milliseconds
         stamps = []
         for segment in speaker_segments:
             start_time = int(segment['start'] * 1000)
             end_time = int(segment['end'] * 1000)
-            #if (end_time-start_time) > 1500:  # Only consider segments longer than 1 second
+            # if (end_time-start_time) > 1500:  # Only consider segments longer than 1 second
             stamps.append([start_time, end_time])
 
         print("stamps: ", len(stamps))
-        
+
         list_timestamps.append(stamps)
 
-    
         filename = file.replace('.rttm', '')
         filenames.append(filename)
 
     print("Timestamps:", len(list_timestamps))
     print("Utterances:", len(list_utterances))
 
-    metadata['filename']= filenames
+    metadata['filename'] = filenames
     metadata['utterances'] = list_utterances
     metadata['timestamps'] = list_timestamps
     metadata.to_csv(f"{csv_dir}/TOS6.csv", index=False)

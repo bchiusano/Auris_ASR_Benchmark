@@ -2,8 +2,6 @@ import pandas as pd
 import sys
 import os
 import re
-import xlsxwriter
-from collections import defaultdict
 from sastadev.lexicon import known_word
 from chamd.cleanCHILDESMD import cleantext
 
