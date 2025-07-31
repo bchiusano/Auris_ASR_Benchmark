@@ -201,7 +201,7 @@ def replace_match_correct(line, to_correct):
     return correct_replace
 
 
-def clean_chat_patterns_only(utterances, targetspeaker):
+def clean_chat_patterns_only(utterances, targetspeaker, DEBUG=False):
     wrong_utterances = []
     correct_utterances = []
 
@@ -413,6 +413,7 @@ def process_all_cha_files(default_childes_path):
     correct_dataframe.to_csv("csvs/sk-adhd-csvs/correct_data.csv", index=False)
 
 
-DEBUG = False
-default_childes_path = '../Asymmetries/SK-ADHD'
-process_all_cha_files(default_childes_path)
+if __name__ == "__main__":
+    DEBUG = False
+    default_childes_path = '../Asymmetries/SK-ADHD'
+    process_all_cha_files(default_childes_path)
