@@ -11,7 +11,7 @@ pipeline = Pipeline.from_pretrained(
   "pyannote/speaker-diarization-3.1",
   use_auth_token=os.getenv("HF_TOKEN"))
 
-directory = r"C:\Users\b.caissottidichiusan\OneDrive - Stichting Onderwijs Koninklijke Auris Groep - 01JO\Desktop\Audio"
+directory = r"C:\Users\b.caissottidichiusan\OneDrive - Stichting Onderwijs Koninklijke Auris Groep - 01JO\Desktop\TOS-5yo"
 
 for audio_file in os.listdir(directory):
       # run the pipeline on each audio file
@@ -30,9 +30,9 @@ for audio_file in os.listdir(directory):
 
         # dump the diarization output to disk using RTTM format
         audio_file = audio_file.replace('.wav', '')
-        if not os.path.exists("rttms"):
-            os.makedirs("rttms")
-        with open(f"rttms/{audio_file}.rttm", "w") as rttm:
+        if not os.path.exists("rttms/TOS"):
+            os.makedirs("rttms/TOS")
+        with open(f"rttms/TOS/{audio_file}.rttm", "w") as rttm:
             diarization.write_rttm(rttm)
 
 # if there are reapeating speakers, you can merge them

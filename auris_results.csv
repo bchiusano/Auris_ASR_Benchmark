@@ -1,0 +1,13 @@
+model,dataset,WER,RTFX
+openai/whisper-large-v2,5yo_TD_dataset,27.81 %,0.27
+openai/whisper-large-v2,5yo_TOS_dataset,59.23 %,0.12
+openai/whisper-large-v2,6yo_TOS_dataset,55.39 %,0.20
+openai/whisper-large-v3,5yo_TD_dataset,25.90 %,0.28
+openai/whisper-large-v3,5yo_TOS_dataset,53.83 %,0.11
+openai/whisper-large-v3,6yo_TOS_dataset,49.55 %,0.19
+openai/whisper-medium,5yo_TD_dataset,31.83 %,0.52
+openai/whisper-medium,5yo_TOS_dataset,58.60 %,0.24
+openai/whisper-medium,6yo_TOS_dataset,57.66 %,0.40
+openai/whisper-small,5yo_TD_dataset,45.12 %,2.14
+openai/whisper-small,5yo_TOS_dataset,74.10 %,0.81
+openai/whisper-small,6yo_TOS_dataset,69.03 %,0.88

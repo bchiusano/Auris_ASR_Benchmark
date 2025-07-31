@@ -237,6 +237,6 @@ def score_results(directory: str, model_id: str = None, DEBUG: bool = False):
 
 
 # very useful to print results
-composite_wer, results, all_df, composite_df = score_results("../results/")
-print(all_df)
-print(composite_df)
+#composite_wer, results, all_df, composite_df = score_results("results/auris/")
+#print(all_df)
+#print(composite_df)
